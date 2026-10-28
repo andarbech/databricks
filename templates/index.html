@@ -124,6 +124,25 @@
     tbody tr:hover { background: #f9fafb; }
     tbody tr:last-child td { border-bottom: none; }
     .price { font-weight: 700; color: var(--primary); }
+    .btn-delete {
+      background: transparent;
+      color: #ef4444;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      width: auto;
+      margin-top: 0;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-delete:hover {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .btn-delete:active { transform: scale(.96); }
+    .col-actions { text-align: center; white-space: nowrap; }
     .empty-state {
       text-align: center;
       padding: 32px 16px;
@@ -143,7 +162,7 @@
     <div class="card">
       <div class="header">
         <h1><span class="icon">📈</span> Stock Watchlist</h1>
-        <p class="hint"> andresito Enter a single ticker symbol. This sends exactly ONE call to the Massive API to fetch the latest price, then adds it to your watchlist.</p>
+        <p class="hint">Enter a single ticker symbol. This sends exactly ONE call to the Massive API to fetch the latest price, then adds it to your watchlist.</p>
       </div>
 
       <form id="stock-form">
@@ -163,6 +182,7 @@
             <th>Email</th>
             <th>Latest price</th>
             <th>Updated</th>
+            <th class="col-actions">Actions</th>
           </tr>
         </thead>
         <tbody id="watchlist-body"></tbody>
@@ -185,7 +205,7 @@
         }
         watchlistBody.innerHTML = "";
         if (data.length === 0) {
-          watchlistBody.innerHTML = `<tr><td colspan="4" class="empty-state">No stocks in your watchlist yet. Add one above to get started!</td></tr>`;
+          watchlistBody.innerHTML = `<tr><td colspan="5" class="empty-state">No stocks in your watchlist yet. Add one above to get started!</td></tr>`;
           return;
         }
         data.forEach((row) => {
@@ -194,7 +214,7 @@
             ? Number(row.latest_price).toFixed(2)
             : "-";
           const updated = row.updated_at ? new Date(row.updated_at).toLocaleString() : "-";
-          tr.innerHTML = `<td>${row.symbol}</td><td>${row.email || "-"}</td><td class="price">${price}</td><td>${updated}</td>`;
+          tr.innerHTML = `<td>${row.symbol}</td><td>${row.email || "-"}</td><td class="price">${price}</td><td>${updated}</td><td class="col-actions"><button class="btn-delete" data-symbol="${row.symbol}">Remove</button></td>`;
           watchlistBody.appendChild(tr);
         });
       } catch (err) {
@@ -224,6 +244,27 @@
       } catch (err) {
         resultEl.textContent = "Request failed: " + err;
       }
+    });
+
+    async function removeFromWatchlist(symbol) {
+      if (!confirm(`Remove ${symbol} from your watchlist?`)) return;
+      try {
+        const resp = await fetch(`/watchlist/${encodeURIComponent(symbol)}`, { method: "DELETE" });
+        const data = await resp.json();
+        if (!resp.ok) {
+          resultEl.textContent = "Error: " + (data.error || resp.statusText);
+          return;
+        }
+        resultEl.textContent = "Removed " + symbol + " from watchlist.";
+        loadWatchlist();
+      } catch (err) {
+        resultEl.textContent = "Delete failed: " + err;
+      }
+    }
+
+    watchlistBody.addEventListener("click", (e) => {
+      const btn = e.target.closest(".btn-delete");
+      if (btn) removeFromWatchlist(btn.dataset.symbol);
     });
 
     loadWatchlist();
