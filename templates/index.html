@@ -1,273 +1,41 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Massive Stock Watchlist</title>
-  <style>
-    :root {
-      --bg: #f0f2f5;
-      --card-bg: #ffffff;
-      --primary: #ff3621;
-      --primary-hover: #e02815;
-      --text: #1a1a2e;
-      --text-muted: #6b7280;
-      --border: #e5e7eb;
-      --radius: 12px;
-      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
-      --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 40px 20px;
-      line-height: 1.6;
-    }
-    .container { max-width: 640px; margin: 0 auto; }
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 32px;
-      margin-bottom: 24px;
-    }
-    .header { text-align: center; margin-bottom: 28px; }
-    .header h1 {
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    .header h1 .icon {
-      width: 32px; height: 32px;
-      background: var(--primary);
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 18px;
-    }
-    .hint { color: var(--text-muted); font-size: 14px; margin-top: 8px; line-height: 1.5; }
-    form { margin-top: 20px; }
-    label { display: block; font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 8px; }
-    input[type="text"] {
-      width: 100%;
-      padding: 12px 14px;
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      font-size: 16px;
-      color: var(--text);
-      background: #fafafa;
-      transition: border-color .2s, box-shadow .2s, background .2s;
-    }
-    input[type="text"]:focus {
-      outline: none;
-      border-color: var(--primary);
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(255,54,33,.12);
-    }
-    button {
-      margin-top: 16px;
-      width: 100%;
-      padding: 12px 20px;
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .2s, transform .1s;
-    }
-    button:hover { background: var(--primary-hover); }
-    button:active { transform: scale(.98); }
-    #result {
-      margin-top: 16px;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      min-height: 0;
-      transition: opacity .2s;
-    }
-    #result:empty { display: none; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 0;
-    }
-    thead th {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      text-align: left;
-      padding: 12px 16px;
-      border-bottom: 2px solid var(--border);
-      background: #fafafa;
-    }
-    thead th:first-child { border-radius: 8px 0 0 0; }
-    thead th:last-child { border-radius: 0 8px 0 0; }
-    tbody td {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
-      font-size: 14px;
-      color: var(--text);
-    }
-    tbody tr { transition: background .15s; }
-    tbody tr:hover { background: #f9fafb; }
-    tbody tr:last-child td { border-bottom: none; }
-    .price { font-weight: 700; color: var(--primary); }
-    .btn-delete {
-      background: transparent;
-      color: #ef4444;
-      border: 1px solid #fecaca;
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      width: auto;
-      margin-top: 0;
-      transition: background .2s, border-color .2s;
-    }
-    .btn-delete:hover {
-      background: #fee2e2;
-      border-color: #ef4444;
-    }
-    .btn-delete:active { transform: scale(.96); }
-    .col-actions { text-align: center; white-space: nowrap; }
-    .empty-state {
-      text-align: center;
-      padding: 32px 16px;
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-    @media (max-width: 520px) {
-      body { padding: 20px 12px; }
-      .card { padding: 20px; }
-      .header h1 { font-size: 22px; }
-      thead th, tbody td { padding: 10px 8px; font-size: 13px; }
-    }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Support desk</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <div class="header">
-        <h1><span class="icon">📈</span> Stock Watchlist</h1>
-        <p class="hint">Enter a single ticker symbol. This sends exactly ONE call to the Massive API to fetch the latest price, then adds it to your watchlist.</p>
-      </div>
-
-      <form id="stock-form">
-        <label for="symbol">Ticker symbol</label>
-        <input type="text" id="symbol" name="symbol" placeholder="AAPL" required>
-        <button type="submit">Add to watchlist</button>
-      </form>
-
-      <div id="result"></div>
+  <header class="topbar"><a class="brand" href="/">S<span>Support desk</span></a><span class="workspace">INTERNAL OPERATIONS</span></header>
+  <main>
+    <div class="page-heading"><div><p class="eyebrow">YOUR TEAM'S SUPPORT WORKSPACE</p><h1>Keep work moving.</h1><p class="muted">Track requests, share updates, and resolve issues together.</p></div><button id="refresh" class="secondary" type="button">Refresh tickets</button></div>
+    <div id="notice" role="status" aria-live="polite" hidden></div>
+    <section class="stats" aria-label="Ticket statistics">
+      <article><span>All tickets</span><strong id="count-all">—</strong></article>
+      <article><span><i class="dot open"></i>Open</span><strong id="count-open">—</strong></article>
+      <article><span><i class="dot in_progress"></i>In progress</span><strong id="count-in_progress">—</strong></article>
+      <article><span><i class="dot resolved"></i>Resolved</span><strong id="count-resolved">—</strong></article>
+    </section>
+    <p class="freshness" id="freshness">Waiting for the first refresh.</p>
+    <div class="desk">
+      <section class="panel ticket-panel" aria-labelledby="tickets-heading">
+        <div class="panel-heading"><h2 id="tickets-heading">Tickets</h2><label class="filter-label">Status<select id="filter"><option value="all">All statuses</option><option value="open">Open</option><option value="in_progress">In progress</option><option value="resolved">Resolved</option></select></label></div>
+        <div id="ticket-list" class="ticket-list" aria-live="polite"><p class="empty">Loading tickets…</p></div>
+        <form id="ticket-form" class="create-form"><h3>Create a ticket</h3><label for="title">What do you need help with?</label><input id="title" name="title" maxlength="200" required placeholder="e.g. Unable to connect to the VPN"><button type="submit">Create ticket <span aria-hidden="true">↗</span></button><p class="hint">New tickets start as open. Your identity is recorded automatically.</p></form>
+      </section>
+      <section class="panel conversation-panel" aria-labelledby="conversation-heading">
+        <div id="selection-empty" class="selection-empty"><div class="empty-icon" aria-hidden="true">↗</div><h2 id="conversation-heading">A clearer path to resolution.</h2><p>Select a ticket to read its conversation,<br>add an update, or change its status.</p></div>
+        <div id="conversation" hidden>
+          <div class="conversation-heading"><p class="eyebrow" id="ticket-number"></p><h2 id="selected-title"></h2><p class="muted" id="ticket-meta"></p><form id="status-form" class="status-form"><label for="status">Ticket status</label><select id="status"><option value="open">Open</option><option value="in_progress">In progress</option><option value="resolved">Resolved</option></select><button type="submit" class="secondary">Save status</button></form></div>
+          <div class="messages-heading"><h3>Conversation</h3><span id="message-count" class="muted"></span></div>
+          <div id="messages" class="messages" aria-live="polite"></div>
+          <form id="message-form" class="message-form"><label for="message-text">Add an update</label><textarea id="message-text" name="message_text" rows="4" maxlength="10000" required placeholder="Share details, ask a question, or explain the resolution…"></textarea><div class="compose-footer"><span class="hint">Visible to everyone with access to this app.</span><button type="submit">Send message <span aria-hidden="true">↗</span></button></div></form>
+        </div>
+      </section>
     </div>
-
-    <div class="card">
-      <table id="watchlist-table">
-        <thead>
-          <tr>
-            <th>Symbol</th>
-            <th>Email</th>
-            <th>Latest price</th>
-            <th>Updated</th>
-            <th class="col-actions">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="watchlist-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <script>
-    const form = document.getElementById("stock-form");
-    const resultEl = document.getElementById("result");
-    const watchlistBody = document.getElementById("watchlist-body");
-
-    async function loadWatchlist() {
-      try {
-        const resp = await fetch("/watchlist");
-        const data = await resp.json();
-        if (!resp.ok) {
-          resultEl.textContent = "Error loading watchlist: " + (data.error || resp.statusText);
-          return;
-        }
-        watchlistBody.innerHTML = "";
-        if (data.length === 0) {
-          watchlistBody.innerHTML = `<tr><td colspan="5" class="empty-state">No stocks in your watchlist yet. Add one above to get started!</td></tr>`;
-          return;
-        }
-        data.forEach((row) => {
-          const tr = document.createElement("tr");
-          const price = row.latest_price !== null && row.latest_price !== undefined
-            ? Number(row.latest_price).toFixed(2)
-            : "-";
-          const updated = row.updated_at ? new Date(row.updated_at).toLocaleString() : "-";
-          tr.innerHTML = `<td>${row.symbol}</td><td>${row.email || "-"}</td><td class="price">${price}</td><td>${updated}</td><td class="col-actions"><button class="btn-delete" data-symbol="${row.symbol}">Remove</button></td>`;
-          watchlistBody.appendChild(tr);
-        });
-      } catch (err) {
-        resultEl.textContent = "Failed to load watchlist: " + err;
-      }
-    }
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const symbol = document.getElementById("symbol").value;
-      resultEl.textContent = "Adding to watchlist...";
-
-      try {
-        const resp = await fetch("/watchlist", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ symbol }),
-        });
-        const data = await resp.json();
-        if (!resp.ok) {
-          resultEl.textContent = "Error: " + (data.error || resp.statusText);
-          return;
-        }
-        resultEl.textContent = "Added " + data.symbol + " at price " + data.latest_price;
-        document.getElementById("symbol").value = "";
-        loadWatchlist();
-      } catch (err) {
-        resultEl.textContent = "Request failed: " + err;
-      }
-    });
-
-    async function removeFromWatchlist(symbol) {
-      if (!confirm(`Remove ${symbol} from your watchlist?`)) return;
-      try {
-        const resp = await fetch(`/watchlist/${encodeURIComponent(symbol)}`, { method: "DELETE" });
-        const data = await resp.json();
-        if (!resp.ok) {
-          resultEl.textContent = "Error: " + (data.error || resp.statusText);
-          return;
-        }
-        resultEl.textContent = "Removed " + symbol + " from watchlist.";
-        loadWatchlist();
-      } catch (err) {
-        resultEl.textContent = "Delete failed: " + err;
-      }
-    }
-
-    watchlistBody.addEventListener("click", (e) => {
-      const btn = e.target.closest(".btn-delete");
-      if (btn) removeFromWatchlist(btn.dataset.symbol);
-    });
-
-    loadWatchlist();
-  </script>
+    <footer>Support desk · Shared internal workspace <span>All changes are saved to Lakebase.</span></footer>
+  </main>
 </body>
 </html>
